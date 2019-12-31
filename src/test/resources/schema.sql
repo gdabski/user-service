@@ -1,0 +1,15 @@
+CREATE TABLE IF NOT EXISTS user (
+	id INTEGER NOT NULL,
+	username VARCHAR(16) NOT NULL,
+	password VARCHAR(60) NOT NULL,
+	name VARCHAR(64),
+	roles INTEGER NOT NULL,
+	email VARCHAR(320),
+	state INTEGER NOT NULL,
+	comment CLOB,
+	CONSTRAINT pk_id PRIMARY KEY (id)
+);
+
+CREATE UNIQUE INDEX IF NOT EXISTS i_username ON user (username);
+CREATE INDEX IF NOT EXISTS i_name ON user (name);
+CREATE INDEX IF NOT EXISTS i_email ON user (email);
