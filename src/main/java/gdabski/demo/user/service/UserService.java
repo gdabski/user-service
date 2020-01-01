@@ -1,5 +1,6 @@
 package gdabski.demo.user.service;
 
+import gdabski.demo.user.dto.UserPatch;
 import gdabski.demo.user.dto.UserSearchCriteria;
 import gdabski.demo.user.dto.UserSpecification;
 import gdabski.demo.user.dto.UserSummary;
@@ -10,8 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class UserService {
 
@@ -23,18 +26,31 @@ public class UserService {
         return userMapper.toSummary(saved);
     }
 
+    @Transactional(readOnly = true)
     public UserSummary findUser(int id) {
         User found = repository.findById(id).orElseThrow(() -> new ObjectRetrievalFailureException(User.class, id));
         return userMapper.toSummary(found);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<UserSummary> findUsers(Pageable pageable, UserSearchCriteria criteria) {
+        Page<User> found = repository.findAllByUsernameNameAndEmail(criteria.getUsername(),
+                criteria.getName(), criteria.getEmail(), pageable);
+        return found.map(userMapper::toSummary);
+    }
+
+    public UserSummary patchUser(int id, UserPatch patch) {
+        User entity = repository.getOne(id);
+        userMapper.patchEntity(entity, patch);
+        return userMapper.toSummary(repository.save(entity));
     }
 
     public void deleteUser(int id) {
         repository.deleteById(id);
     }
 
-    public Page<UserSummary> findUsers(Pageable pageable, UserSearchCriteria criteria) {
-        Page<User> found = repository.findAllByUsernameNameAndEmail(criteria.getUsername(),
-                criteria.getName(), criteria.getEmail(), pageable);
-        return found.map(userMapper::toSummary);
-    }
+    // EntityNotFoundException
+    // ObjectRetrievalFailureException
+    // EmptyResultDataAccessException
+
 }

@@ -7,6 +7,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
+import gdabski.demo.user.dto.UserPatch;
 import gdabski.demo.user.dto.UserSearchCriteria.UserSearchCriteriaBuilder;
 import gdabski.demo.user.dto.UserSpecification;
 import gdabski.demo.user.dto.UserSummary;
@@ -45,10 +46,22 @@ public class UserController {
         return service.findUser(id);
     }
 
+    @PatchMapping("/{id}")
+    @ResponseStatus(OK)
+    // user is able to make himself an admin...
+    public UserSummary updateUser(@PathVariable int id, @RequestBody @Valid @NotNull UserPatch patch) {
+        return service.patchUser(id, patch);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
     public void deleteUser(@PathVariable int id) {
         service.deleteUser(id);
+    }
+
+    @PutMapping("/{id}/password")
+    public void changePassword(@RequestBody @NotNull String password) {
+        throw new UnsupportedOperationException();
     }
 
 }

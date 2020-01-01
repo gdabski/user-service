@@ -1,6 +1,5 @@
 package gdabski.demo.user.service;
 
-import javax.validation.constraints.NotNull;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -9,16 +8,16 @@ import java.lang.annotation.Target;
 import lombok.RequiredArgsConstructor;
 import org.mapstruct.Qualifier;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @RequiredArgsConstructor
 public class PasswordMapper {
 
     private final PasswordEncoder encoder;
 
     @Password
-    public String encode(@NotNull String password) {
+    public String encode(String password) {
         return encoder.encode(password);
     }
 

@@ -1,7 +1,6 @@
 package gdabski.demo.user.conf;
 
-import static org.springframework.http.HttpMethod.DELETE;
-import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.*;
 
 import gdabski.demo.user.repository.UserRepository;
 import gdabski.demo.user.security.DefaultUserDetailsService;
@@ -41,6 +40,8 @@ public class WebSecurityConfiguration {
                         .antMatchers(DELETE, "/user/*").access("hasRole('ADMIN')")
                         // User should also be able to delete own account. This would require extending
                         // the used UserDetails implementation with id field.
+                        .antMatchers(PATCH, "/user/*").access("hasRole('ADMIN')")
+                        // User should also be able to modify own account.
                         .antMatchers("/error/**").permitAll()
                         .anyRequest().authenticated()
                     .and().httpBasic()

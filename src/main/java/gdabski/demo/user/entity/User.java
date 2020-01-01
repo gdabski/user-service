@@ -2,18 +2,21 @@ package gdabski.demo.user.entity;
 
 import static lombok.AccessLevel.PRIVATE;
 
-import javax.persistence.*;
+import javax.persistence.Convert;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.Set;
 
 import gdabski.demo.user.domain.UserRole;
 import gdabski.demo.user.domain.UserState;
 import gdabski.demo.user.entity.convert.UserRolesToBitMapConverter;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 
+@Data
 @AllArgsConstructor(access = PRIVATE)
-@Getter
-@EqualsAndHashCode
-@ToString
 @Builder
 @Entity
 public class User {

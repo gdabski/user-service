@@ -23,6 +23,6 @@ class PasswordMapperTest {
         // then
         verify(encoder).encode("password");
         assertEquals("hashed", mapped);
-
     }
+
 }
