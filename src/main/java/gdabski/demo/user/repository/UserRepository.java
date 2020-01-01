@@ -1,5 +1,7 @@
 package gdabski.demo.user.repository;
 
+import java.util.Optional;
+
 import gdabski.demo.user.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,4 +28,11 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             "AND (:email IS NULL OR u.email LIKE %:email%)")
     Page<User> findAllByUsernameNameAndEmail(String username, String name, String email, Pageable pageable);
 
+    /**
+     * Finds one (and presumably the only one) {@link User} with the given username.
+     * @param username the user's username
+     * @return {@link Optional} containing {@code User} he found user, empty {@code Optional}
+     * if user not found
+     */
+    Optional<User> findOneByUsername(String username);
 }
