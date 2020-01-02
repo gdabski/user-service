@@ -33,16 +33,17 @@ public class WebSecurityConfiguration {
     @Order(100)
     static class GeneralWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
+        private static final String ADMIN_OR_SELF = "hasRole('ADMIN') or T(Integer).valueOf(#id) == principal.id";
+
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.authorizeRequests()
-                        .antMatchers(POST, "/user").anonymous()
-                        .antMatchers(DELETE, "/user/*").access("hasRole('ADMIN')")
-                        // User should also be able to delete own account. This would require extending
-                        // the used UserDetails implementation with id field.
-                        .antMatchers(PATCH, "/user/*").access("hasRole('ADMIN')")
-                        // User should also be able to modify own account.
+                        .antMatchers(DELETE, "/user/{id}")
+                            .access(ADMIN_OR_SELF)
+                        .antMatchers(PATCH, "/user/{id}")
+                            .access(ADMIN_OR_SELF)
                         .antMatchers("/error/**").permitAll()
+                        .antMatchers(POST, "/user").anonymous()
                         .anyRequest().authenticated()
                     .and().httpBasic()
                     .and().csrf().disable();

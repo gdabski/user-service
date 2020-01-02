@@ -1,15 +1,18 @@
 package gdabski.demo.user.service;
 
+import javax.persistence.EntityNotFoundException;
+
 import gdabski.demo.user.dto.UserPatch;
 import gdabski.demo.user.dto.UserSearchCriteria;
 import gdabski.demo.user.dto.UserSpecification;
 import gdabski.demo.user.dto.UserSummary;
 import gdabski.demo.user.entity.User;
 import gdabski.demo.user.repository.UserRepository;
+import gdabski.demo.user.service.except.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.orm.ObjectRetrievalFailureException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +31,7 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public UserSummary findUser(int id) {
-        User found = repository.findById(id).orElseThrow(() -> new ObjectRetrievalFailureException(User.class, id));
+        User found = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException(id));
         return userMapper.toSummary(found);
     }
 
@@ -40,17 +43,21 @@ public class UserService {
     }
 
     public UserSummary patchUser(int id, UserPatch patch) {
-        User entity = repository.getOne(id);
-        userMapper.patchEntity(entity, patch);
-        return userMapper.toSummary(repository.save(entity));
+        try {
+            User entity = repository.getOne(id);
+            userMapper.patchEntity(entity, patch);
+            return userMapper.toSummary(repository.save(entity));
+        } catch (EntityNotFoundException e) {
+            throw new ResourceNotFoundException(id);
+        }
     }
 
     public void deleteUser(int id) {
-        repository.deleteById(id);
+        try {
+            repository.deleteById(id);
+        } catch (EmptyResultDataAccessException e) {
+            throw new ResourceNotFoundException(id);
+        }
     }
-
-    // EntityNotFoundException
-    // ObjectRetrievalFailureException
-    // EmptyResultDataAccessException
 
 }

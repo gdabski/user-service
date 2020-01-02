@@ -1,8 +1,8 @@
 package gdabski.demo.user.entity.convert;
 
-import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static gdabski.demo.user.domain.UserRole.ADMIN;
 import static gdabski.demo.user.domain.UserRole.USER;
+import static java.util.stream.Collectors.toSet;
 
 import javax.persistence.AttributeConverter;
 import java.util.Map.Entry;
@@ -35,6 +35,6 @@ public class UserRolesToBitMapConverter implements AttributeConverter<Set<UserRo
         return MAPPING.entrySet().stream()
                 .filter(entry -> (entry.getValue() & value) != 0)
                 .map(Entry::getKey)
-                .collect(toImmutableSet());
+                .collect(toSet());
     }
 }

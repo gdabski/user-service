@@ -13,26 +13,18 @@ public final class UserFixtures {
 
     public static UserBuilder userBuilder() {
         return User.builder()
+                .id(1)
                 .username("joe123")
                 .password("$2y$10$uqIUUWx8tnofW7sNSbJ2neFQWSYzVYiPRbTlVrx7x2JtLCG26s0T2")
-                .roles(EnumSet.of(USER))
-                .state(ACTIVE);
-    }
-
-    public static UserBuilder saturatedUserBuilder() {
-        return userBuilder()
-                .id(1)
                 .name("Joe Shmoe")
+                .roles(EnumSet.of(USER))
                 .email("joe123@example.com")
+                .state(ACTIVE)
                 .comment("Great user!");
     }
 
     public static User newUser() {
         return userBuilder().build();
-    }
-
-    public static User newSaturatedUser() {
-        return saturatedUserBuilder().build();
     }
 
 }

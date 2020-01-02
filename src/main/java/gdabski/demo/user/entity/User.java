@@ -11,12 +11,12 @@ import java.util.Set;
 import gdabski.demo.user.domain.UserRole;
 import gdabski.demo.user.domain.UserState;
 import gdabski.demo.user.entity.convert.UserRolesToBitMapConverter;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.*;
 
-@Data
 @AllArgsConstructor(access = PRIVATE)
+@ToString(of = "id")
+@Getter
+@Setter
 @Builder
 @Entity
 public class User {
