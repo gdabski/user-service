@@ -33,33 +33,47 @@ public class UserController {
     @PostMapping
     @ResponseStatus(CREATED)
     public UserSummary createUser(@RequestBody @Valid @NotNull UserSpecification specification) {
-        return service.createUser(specification);
+        log.info("Got request to create new user.");
+        UserSummary user = service.createUser(specification);
+        log.info("User created: {}.", user.getId());
+        return user;
     }
 
     @GetMapping("/{id}")
     @ResponseStatus(OK)
     public UserSummary findUser(@PathVariable int id) {
-        return service.findUser(id);
+        log.info("Got request to find user: {}.", id);
+        UserSummary user = service.findUser(id);
+        log.info("Returning user: {}.", id);
+        return user;
     }
 
     @GetMapping
     @ResponseStatus(OK)
     // could use a custom return type instead of Page
     public Page<UserSummary> findUsers(Pageable pageable, UserSearchCriteriaBuilder criteria) {
-        return service.findUsers(pageable, criteria.build());
+        log.info("Got request to find users: criteria {}, pageable {}.", criteria, pageable);
+        Page<UserSummary> users = service.findUsers(pageable, criteria.build());
+        log.info("Returning paged users: {}.", users);
+        return users;
     }
 
     @PatchMapping("/{id}")
     @ResponseStatus(OK)
-    // user is able to make himself an admin...
+    // user is able to make himself an admin here...
     public UserSummary updateUser(@PathVariable int id, @RequestBody @Valid @NotNull UserPatch patch) {
-        return service.patchUser(id, patch);
+        log.info("Got request to update user: {}.", id);
+        UserSummary user = service.patchUser(id, patch);
+        log.info("Update user: {}.", id);
+        return user;
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
     public void deleteUser(@PathVariable int id) {
+        log.info("Got request to delete user: {}.", id);
         service.deleteUser(id);
+        log.info("Deleted user: {}", id);
     }
 
     @PutMapping("/{id}/password")
@@ -70,8 +84,9 @@ public class UserController {
     @ExceptionHandler
     @ResponseStatus(NOT_FOUND)
     public ErrorResponse handleNotFoundException(ResourceNotFoundException e, HttpServletRequest request) {
+        log.info("User doesn't exist: {}.", e.getId());
         return ErrorResponse.builder()
-                .message(String.format("User doesn't exist: %s.", e.getId()))
+                .message(String.format("User doesn't exist: %d.", e.getId()))
                 .path(request.getRequestURI())
                 .build();
     }
@@ -79,6 +94,7 @@ public class UserController {
     @ExceptionHandler
     @ResponseStatus(BAD_REQUEST)
     public ErrorResponse handleMessageConversionException(HttpMessageConversionException e, HttpServletRequest request) {
+        log.info("Got malformed request at path {}", request.getRequestURI());
         return ErrorResponse.builder()
                 .message(e.getMessage())
                 .path(request.getRequestURI())
