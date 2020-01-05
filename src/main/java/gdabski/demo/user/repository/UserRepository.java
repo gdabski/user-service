@@ -23,9 +23,9 @@ public interface UserRepository extends JpaRepository<User, Integer> {
      * @param pageable {@link Pageable} describing the page number, page size and sorting
      * @return {@link Page} containing the selected {@link User}s.
      */
-    @Query("SELECT u FROM User u WHERE (:username IS NULL OR u.username LIKE %:username%)" +
-            "AND (:name IS NULL OR u.name LIKE %:name%)" +
-            "AND (:email IS NULL OR u.email LIKE %:email%)")
+    @Query("SELECT u FROM User u WHERE (:username IS NULL OR lower(u.username) LIKE lower(concat('%', concat(:username, '%')))) " +
+            "AND (:name IS NULL OR lower(u.name) LIKE lower(concat('%', concat(:name, '%')))) " +
+            "AND (:email IS NULL OR lower(u.email) LIKE lower(concat('%', concat(:email, '%'))))")
     Page<User> findAllByUsernameNameAndEmail(String username, String name, String email, Pageable pageable);
 
     /**

@@ -1,42 +1,47 @@
 package gdabski.demo.user.control;
 
-import static gdabski.demo.user.control.VendorMediaType.APPLICATION_GDABSKI_DEMO_USER_V1;
+import static gdabski.demo.user.control.MediaTypes.APPLICATION_GDABSKI_DEMO_USER_V1;
 import static org.springframework.http.HttpStatus.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import java.net.URI;
 
-import gdabski.demo.user.dto.*;
+import gdabski.demo.user.dto.ErrorResponse;
+import gdabski.demo.user.dto.UserPatch;
 import gdabski.demo.user.dto.UserSearchCriteria.UserSearchCriteriaBuilder;
+import gdabski.demo.user.dto.UserSpecification;
+import gdabski.demo.user.dto.UserSummary;
 import gdabski.demo.user.service.UserService;
+import gdabski.demo.user.service.except.DuplicateUsernameException;
 import gdabski.demo.user.service.except.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
 @RequestMapping(
-        value = "user",
-        consumes = {APPLICATION_JSON_VALUE, APPLICATION_GDABSKI_DEMO_USER_V1},
-        produces = APPLICATION_JSON_VALUE)
+        value = "users",
+        produces = APPLICATION_GDABSKI_DEMO_USER_V1)
 @RequiredArgsConstructor
 public class UserController {
 
     private final UserService service;
 
-    @PostMapping
-    @ResponseStatus(CREATED)
-    public UserSummary createUser(@RequestBody @Valid @NotNull UserSpecification specification) {
+    @PostMapping(consumes = APPLICATION_JSON_VALUE)
+    public ResponseEntity<UserSummary> createUser(@RequestBody @Valid @NotNull UserSpecification specification) {
         log.info("Got request to create new user.");
         UserSummary user = service.createUser(specification);
         log.info("User created: {}.", user.getId());
-        return user;
+        return ResponseEntity.created(URI.create("/users/" + user.getId())).body(user);
     }
 
     @GetMapping("/{id}")
@@ -58,7 +63,7 @@ public class UserController {
         return users;
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping(value = "/{id}", consumes = APPLICATION_JSON_VALUE)
     @ResponseStatus(OK)
     // user is able to make himself an admin here...
     public UserSummary updateUser(@PathVariable int id, @RequestBody @Valid @NotNull UserPatch patch) {
@@ -78,7 +83,7 @@ public class UserController {
 
     @PutMapping("/{id}/password")
     public void changePassword(@RequestBody @NotNull String password) {
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException("Not yet implemeted :(");
     }
 
     @ExceptionHandler
@@ -94,9 +99,29 @@ public class UserController {
     @ExceptionHandler
     @ResponseStatus(BAD_REQUEST)
     public ErrorResponse handleMessageConversionException(HttpMessageConversionException e, HttpServletRequest request) {
-        log.info("Got malformed request at path {}", request.getRequestURI());
+        log.info("Got malformed request at {} {}", request.getMethod(), request.getRequestURI());
         return ErrorResponse.builder()
                 .message(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(UNPROCESSABLE_ENTITY)
+    public ErrorResponse handleValidationException(MethodArgumentNotValidException e, HttpServletRequest request) {
+        log.info("Got semantically invalid request at {} {}", request.getMethod(), request.getRequestURI());
+        return ErrorResponse.builder()
+                .message(e.getMessage())
+                .path(request.getRequestURI())
+                .build();
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(CONFLICT)
+    public ErrorResponse handleDuplicateUsername(DuplicateUsernameException e, HttpServletRequest request) {
+        log.info("Attempt to create user with duplicate username: {}", e.getUsername());
+        return ErrorResponse.builder()
+                .message(String.format("Username already used: %s.", e.getUsername()))
                 .path(request.getRequestURI())
                 .build();
     }

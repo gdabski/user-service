@@ -8,8 +8,10 @@ import gdabski.demo.user.dto.UserSpecification;
 import gdabski.demo.user.dto.UserSummary;
 import gdabski.demo.user.entity.User;
 import gdabski.demo.user.repository.UserRepository;
+import gdabski.demo.user.service.except.DuplicateUsernameException;
 import gdabski.demo.user.service.except.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -25,8 +27,12 @@ public class UserService {
     private final UserMapper userMapper;
 
     public UserSummary createUser(UserSpecification specification) {
-        User saved = repository.save(userMapper.toEntity(specification));
-        return userMapper.toSummary(saved);
+        try {
+            User saved = repository.saveAndFlush(userMapper.toEntity(specification));
+            return userMapper.toSummary(saved);
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateUsernameException(specification.getUsername());
+        }
     }
 
     @Transactional(readOnly = true)

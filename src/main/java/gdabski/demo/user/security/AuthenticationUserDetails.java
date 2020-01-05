@@ -1,7 +1,7 @@
 package gdabski.demo.user.security;
 
+import static com.google.common.collect.ImmutableSet.toImmutableSet;
 import static gdabski.demo.user.domain.UserState.ACTIVE;
-import static java.util.stream.Collectors.toUnmodifiableSet;
 
 import java.util.Collection;
 import java.util.Set;
@@ -37,7 +37,7 @@ public class AuthenticationUserDetails implements UserDetails {
                 .sorted()
                 .map(role -> String.format("ROLE_%s", role.getName()))
                 .map(SimpleGrantedAuthority::new)
-                .collect(toUnmodifiableSet());
+                .collect(toImmutableSet());
     }
 
     @Override

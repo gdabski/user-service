@@ -13,8 +13,10 @@ import java.util.Optional;
 import gdabski.demo.user.dto.UserDtoFixtures;
 import gdabski.demo.user.entity.UserFixtures;
 import gdabski.demo.user.repository.UserRepository;
+import gdabski.demo.user.service.except.DuplicateUsernameException;
 import gdabski.demo.user.service.except.ResourceNotFoundException;
 import org.junit.jupiter.api.Test;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
@@ -34,7 +36,7 @@ class UserServiceTest {
         var summary = UserDtoFixtures.newUserSummary();
 
         when(mapper.toEntity(any())).thenReturn(entityWithoutId);
-        when(repository.save(any())).thenReturn(entityWithId);
+        when(repository.saveAndFlush(any())).thenReturn(entityWithId);
         when(mapper.toSummary(any())).thenReturn(summary);
 
         // when
@@ -42,11 +44,30 @@ class UserServiceTest {
 
         // then
         verify(mapper).toEntity(specification);
-        verify(repository).save(entityWithoutId);
+        verify(repository).saveAndFlush(entityWithoutId);
         verify(mapper).toSummary(entityWithId);
         verifyNoMoreInteractions(repository, mapper);
 
         assertEquals(summary, returned);
+    }
+
+    @Test
+    public void shouldThrowException_on_createUser_when_usernameAlreadyUsed() {
+        // given
+        var specification = UserDtoFixtures.newUserSpecification();
+        var entity = UserFixtures.userBuilder().id(null).build();
+
+        when(mapper.toEntity(any())).thenReturn(entity);
+        when(repository.saveAndFlush(any())).thenThrow(new DataIntegrityViolationException("Unique constaint violation."));
+
+        // when and then
+        assertThrows(DuplicateUsernameException.class, () -> {
+            service.createUser(specification);
+        });
+
+        verify(mapper).toEntity(specification);
+        verify(repository).saveAndFlush(entity);
+        verifyNoMoreInteractions(repository, mapper);
     }
 
     @Test
@@ -71,7 +92,7 @@ class UserServiceTest {
     }
 
     @Test
-    public void shouldQueryForUserAndThrowException_on_findUser_when_userNotExists() {
+    public void shouldThrowException_on_findUser_when_userNotExists() {
         // given
         int id = 1;
 
@@ -186,7 +207,6 @@ class UserServiceTest {
             service.deleteUser(id);
         });
 
-        // then
         verify(repository).deleteById(id);
         verifyNoMoreInteractions(repository, mapper);
     }

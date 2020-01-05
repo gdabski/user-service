@@ -4,6 +4,7 @@ import static gdabski.demo.user.domain.UserState.INACTIVE;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.http.HttpStatus.CREATED;
 
 import gdabski.demo.user.dto.UserDtoFixtures;
 import gdabski.demo.user.dto.UserSummary;
@@ -32,7 +33,8 @@ class UserControllerTest {
         verify(userService).createUser(specification);
         verifyNoMoreInteractions(userService);
 
-        assertEquals(summary, returned);
+        assertEquals(CREATED, returned.getStatusCode());
+        assertEquals(summary, returned.getBody());
     }
 
     @Test

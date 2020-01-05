@@ -33,17 +33,19 @@ public class WebSecurityConfiguration {
     @Order(100)
     static class GeneralWebSecurityConfigurer extends WebSecurityConfigurerAdapter {
 
-        private static final String ADMIN_OR_SELF = "hasRole('ADMIN') or T(Integer).valueOf(#id) == principal.id";
+        /* Very dirty. */
+        private static final String ADMIN_OR_SELF = "hasRole('ADMIN') or " +
+                "!(principal instanceof T(String)) and T(Integer).valueOf(#id) == principal.id";
 
         @Override
         protected void configure(HttpSecurity http) throws Exception {
             http.authorizeRequests()
-                        .antMatchers(DELETE, "/user/{id}")
+                        .antMatchers(DELETE, "/users/{id}")
                             .access(ADMIN_OR_SELF)
-                        .antMatchers(PATCH, "/user/{id}")
+                        .antMatchers(PATCH, "/users/{id}")
                             .access(ADMIN_OR_SELF)
                         .antMatchers("/error/**").permitAll()
-                        .antMatchers(POST, "/user").anonymous()
+                        .antMatchers(POST, "/users").anonymous()
                         .anyRequest().authenticated()
                     .and().httpBasic()
                     .and().csrf().disable();

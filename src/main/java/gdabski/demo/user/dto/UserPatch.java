@@ -3,6 +3,7 @@ package gdabski.demo.user.dto;
 import static gdabski.demo.user.domain.UserState.ACTIVE;
 
 import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.EnumSet;
@@ -13,7 +14,7 @@ import gdabski.demo.user.domain.UserState;
 import lombok.*;
 
 /**
- * DTO to convey full semnatics of a <a href=https://tools.ietf.org/html/rfc7386>RFC 7386</a>-like
+ * DTO to convey full semantics of a <a href=https://tools.ietf.org/html/rfc7386>RFC 7386</a>-like
  * PATCH request for a user resource.
  * <p>
  * Package-private setters are meant to be only used by deserialization. Some fields are initialized
@@ -29,13 +30,12 @@ public class UserPatch {
     UserPatch() {}
 
     @Getter
-    @Size(max = 64)
+    @Size(min = 1, max = 64)
     private String name;
     boolean hasName;
 
     @Getter
-    @NotNull
-    @Size(min = 1, message = "Must specify at least one role.")
+    @NotEmpty(message = "Must specify at least one role.")
     private Set<UserRole> roles = EnumSet.allOf(UserRole.class);
     boolean hasRoles;
 
@@ -50,6 +50,7 @@ public class UserPatch {
     boolean hasState;
 
     @Getter
+    @Size(min = 1)
     private String comment;
     boolean hasComment;
 

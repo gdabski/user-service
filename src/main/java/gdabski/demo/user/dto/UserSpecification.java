@@ -1,9 +1,6 @@
 package gdabski.demo.user.dto;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.util.Set;
 
 import gdabski.demo.user.domain.UserRole;
@@ -19,14 +16,13 @@ public class UserSpecification {
     private final String username;
 
     @NotNull
-    @Size(max = 1024)
+    @Size(min = 1, max = 1024)
     private final String password;
 
-    @Size(max = 64)
+    @Size(min = 1, max = 64)
     private final String name;
 
-    @NotNull
-    @Size(min = 1, message = "Must specify at least one role.")
+    @NotEmpty(message = "Must specify at least one role.")
     private final Set<UserRole> roles;
 
     @Email
@@ -35,6 +31,7 @@ public class UserSpecification {
     @NotNull
     private final UserState state;
 
+    @Size(min = 1)
     private final String comment;
 
 }
