@@ -1,5 +1,6 @@
 package gdabski.demo.user.it;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static gdabski.demo.user.it.matcher.HttpStatusMatcher.is;
 import static gdabski.demo.user.it.service.UserServiceMethods.*;
 import static java.util.Collections.emptySet;
@@ -306,6 +307,27 @@ class PostUserIT {
         // given
         var userSpecification = ITUserSpecification.defaultBuilder()
                 .roles(emptySet())
+                .build();
+
+        // when
+        var response = userService.newRequest()
+                .accept(APPLICATION_GDABSKI_DEMO_USER_V1)
+                .contentType(APPLICATION_JSON_VALUE)
+                .body(userSpecification).post(users());
+
+        // then
+        response.then()
+                .statusCode(is(UNPROCESSABLE_ENTITY))
+                .contentType(APPLICATION_GDABSKI_DEMO_USER_V1)
+                .body("message", notNullValue())
+                .body("path", equalTo(users()));
+    }
+
+    @Test
+    public void shouldReturnUnprocessableEntity_when_rolesContainNullElements() {
+        // given
+        var userSpecification = ITUserSpecification.defaultBuilder()
+                .roles(newHashSet("ADMIN", null))
                 .build();
 
         // when

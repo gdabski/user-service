@@ -23,7 +23,7 @@ public class UserSpecification {
     private final String name;
 
     @NotEmpty(message = "Must specify at least one role.")
-    private final Set<UserRole> roles;
+    private final Set<@NotNull UserRole> roles;
 
     @Email
     private final String email;

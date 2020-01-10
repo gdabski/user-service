@@ -36,7 +36,7 @@ public class UserPatch {
 
     @Getter
     @NotEmpty(message = "Must specify at least one role.")
-    private Set<UserRole> roles = EnumSet.allOf(UserRole.class);
+    private Set<@NotNull UserRole> roles = EnumSet.allOf(UserRole.class);
     boolean hasRoles;
 
     @Getter
